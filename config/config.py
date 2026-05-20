@@ -14,5 +14,9 @@ class Config:
         self.AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
         self.AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 
+        self.TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+        self.TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+        self.TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
+
 # Instancia global
 settings = Config()

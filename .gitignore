@@ -142,3 +142,4 @@ Thumbs.db
 
 # Local / temporary test results
 test_aws.py
+test_whatsapp.py
