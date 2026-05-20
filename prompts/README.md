@@ -1,1 +1,3 @@
-Organiza aqui tus prompts para tener todo mas estructurado :)
+# Modificación de Prompts
+
+Este directorio contiene las instrucciones del sistema (prompts) que controlan el comportamiento del agente.
