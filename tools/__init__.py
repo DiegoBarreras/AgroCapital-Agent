@@ -12,6 +12,9 @@ Aquí es donde los participantes del Hackathon registran sus herramientas.
 ╚══════════════════════════════════════════════════════════════════╝
 """
 
+from tools.scoring import score_lead
+from tools.fira import verificar_requisitos_fira
+
 from tools.cloud.aws.aws_tools import (
     upload_file_to_s3,
     download_file_from_s3,
