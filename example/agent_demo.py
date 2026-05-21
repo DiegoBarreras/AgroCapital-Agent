@@ -1,5 +1,5 @@
 """
-Worker Validador de Documentos KYC/KYB -- Ejemplo del Hackathon.
+Worker Validador de Documentos-- Ejemplo del Hackathon.
 
 Demuestra un Agente Autonomo de Cumplimiento que recibe documentos de proveedores,
 los procesa y valida sin intervencion humana.
@@ -52,6 +52,7 @@ class DocumentoRecibido:
         nombre_proveedor: Nombre del proveedor para personalizar la comunicacion.
         datos_esperados: Datos clave que el documento debe contener/coincidir.
     """
+
     archivo_local: str
     tipo_esperado: str
     telefono_proveedor: str
@@ -186,10 +187,10 @@ async def main() -> None:
     evento_a = DocumentoRecibido(
         archivo_local=os.path.join(assets_dir, "acta_nacimiento.png"),
         tipo_esperado="Acta de Nacimiento",
-        telefono_proveedor="+5216981049748",
-        nombre_proveedor="Carlos Martinez",
+        telefono_proveedor="+526611223344",
+        nombre_proveedor="Alejandro Gastelum",
         datos_esperados={
-            "Nombre del titular": "Carlos Martinez",
+            "Nombre del titular": "Alejandro Gastelum",
             "Pais de emision": "Mexico",
         },
     )
@@ -207,8 +208,8 @@ async def main() -> None:
     evento_b = DocumentoRecibido(
         archivo_local=os.path.join(assets_dir, "acta_nacimiento.png"),
         tipo_esperado="Factura Comercial",
-        telefono_proveedor="+5216981049748",
-        nombre_proveedor="Carlos Martinez",
+        telefono_proveedor="+526611223344",
+        nombre_proveedor="Alejandro Gastelum",
         datos_esperados={
             "RFC del emisor": "MARC850101XYZ",
             "Monto minimo": "$1,000 MXN",
@@ -219,9 +220,15 @@ async def main() -> None:
 
 if __name__ == "__main__":
     # Validar que al menos existan credenciales basicas de LLM
-    if not settings.OPENAI_API_KEY and not settings.GEMINI_API_KEY and not settings.ANTHROPIC_API_KEY:
+    if (
+        not settings.OPENAI_API_KEY
+        and not settings.GEMINI_API_KEY
+        and not settings.ANTHROPIC_API_KEY
+    ):
         print("Error: No se detecto ninguna API Key de LLM en el archivo .env")
-        print("Configura OPENAI_API_KEY, GEMINI_API_KEY o ANTHROPIC_API_KEY antes de ejecutar.")
+        print(
+            "Configura OPENAI_API_KEY, GEMINI_API_KEY o ANTHROPIC_API_KEY antes de ejecutar."
+        )
         sys.exit(1)
 
     asyncio.run(main())

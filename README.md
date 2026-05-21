@@ -1,197 +1,131 @@
-# 🚀 Deep Agent B2B Sales Starter-Kit
+# Agent Starter Kit - BuildDay: Agentes Inteligentes
 
-¡Bienvenido al **Starter-Kit de Agentes Profundos (Deep Agents)** para el Hackathon B2B! Este Boilerplate está diseñado para abstraer toda la complejidad técnica de la orquestación de agentes, reintentos de herramientas, y persistencia de memoria para que los equipos puedan enfocarse en lo que realmente importa: **ajustar prompts comerciales y crear herramientas potentes**.
+¡Bienvenido al Agent Starter Kit! Este repositorio ha sido diseñado como base para el BuildDay centrado en la creación de Agentes Inteligentes. Proporciona una arquitectura robusta, modular y lista para producción utilizando LangGraph, LangChain y diversas integraciones de herramientas.
 
----
+> **Tu Misión:** Analizar, comprender y extender las capacidades de este kit para desarrollar agentes autónomos que resuelvan el problema planteado. 
 
-## 🏗️ Arquitectura de Memoria Dual y Orquestación
+## Descripción General
 
-Este Starter-Kit implementa un patrón **ReAct (Reasoning + Acting)** de producción con las siguientes características clave:
+Este starter kit permite a los desarrolladores enfocarse en la lógica de negocio y el comportamiento de sus agentes, abstrayendo la complejidad de la orquestación, la persistencia de memoria y la conexión con modelos de lenguaje (LLMs).
 
-```mermaid
-graph TB
-    subgraph "🏗️ Espacio del Participante"
-        P["prompts/example.py<br/>Prompt de Negocio"]
-        T["tools/ (Custom Tools)<br/>Registradas en tools/__init__.py"]
-        M["main.py<br/>Punto de Entrada"]
-    end
-
-    subgraph "⚙️ Motor Core (NO TOCAR)"
-        E["core/engine.py<br/>create_deep_agent()"]
-        LF["core/llm_factory.py<br/>get_llm()"]
-        RA["create_react_agent<br/>(LangGraph)"]
-        DP["Prompt Dinámico<br/>(Callable)"]
-    end
-
-    subgraph "🧠 Memoria Dual"
-        SQLite["sqlite3 / checkpoints.db<br/>(Persistencia de Hilos)"]
-        Mem0["memory/mem0_client.py<br/>(Memoria Semántica de Largo Plazo)"]
-    end
-
-    subgraph "🔌 Servicios (lib/)"
-        S3["S3 Service"]
-        OCR["OCR Service"]
-        TW["Twilio Service"]
-    end
-
-    M -->|"Prompt + Tools"| E
-    E -->|"Instancia LLM"| LF
-    E -->|"Compila"| RA
-    E -->|"Modifica System Prompt"| DP
-    DP -->|"Recupera recuerdos"| Mem0
-    RA -->|"Persiste estado"| SQLite
-    RA -->|"Usa"| T
-    T -->|"Wrappea"| S3
-    T -->|"Wrappea"| OCR
-    T -->|"Wrappea"| TW
-```
-
-### 1. Persistencia de Estado (Checkpointing) — Memoria a Corto Plazo
-El motor está conectado a un `SqliteSaver` local (`checkpoints.db`). Cada paso que da el agente, cada llamada a herramientas y cada parte de la conversación queda grabada en un **Thread**. Si el servidor falla, el agente se puede reanudar exactamente desde el nodo donde se interrumpió simplemente pasándole el mismo `--thread-id`.
-
-### 2. Memoria Semántica (Largo Plazo) — Mem0 (Integración Externa)
-El starter-kit expone un wrapper para **Mem0** en `memory/mem0_client.py`. Este cliente se encarga de:
-- **Extraer hechos:** Al finalizar un flujo, se sincronizan las interacciones relevantes y Mem0 extrae hechos de forma automática.
-- **Búsqueda Semántica:** En cada turno de la conversación, se consultan semánticamente recuerdos del cliente (`user_id`) y se inyectan dinámicamente en el System Prompt a través del modificador dinámico de prompts.
-
-### 3. Factory de LLM Multi-Proveedor
-El agente no está atado a OpenAI. Los participantes pueden configurar cualquiera de estos proveedores en su `.env`:
-- **OpenAI** (ej: `gpt-4o`)
-- **Google / Gemini** (ej: `gemini-1.5-flash`)
-- **Anthropic** (ej: `claude-3-5-sonnet-latest`)
+### Características Principales:
+- Orquestación con LangGraph: Motor basado en grafos de estado para agentes ReAct.
+- Multi-Provider: Soporte nativo para OpenAI, Google (Gemini) y Anthropic.
+- Persistencia de Sesión: Base de datos SQLite integrada para mantener el historial de conversaciones de forma asíncrona.
+- Tooling Ready: Herramientas pre-configuradas para AWS (S3) y mensajería (WhatsApp vía Twilio).
 
 ---
 
-## 📂 Organización de Carpetas
+## Estructura del Proyecto
 
-La arquitectura del starter-kit está estrictamente segmentada para evitar errores en producción:
-
-```
+```text
 agents-starterkit/
-├── core/                            # ⚙️ MOTOR CORE (NO MODIFICAR)
-│   ├── engine.py                    # Compilación de create_react_agent y ejecución asíncrona
-│   └── llm_factory.py               # Instanciación dinámica del LLM (OpenAI, Gemini, Anthropic)
-├── memory/                          # 🧠 MEMORIA SEMÁNTICA (INTEGRACIÓN EXTERNA)
-│   └── mem0_client.py               # Wrapper de Mem0 para add_memory y get_context
-├── config/                          # 🔧 CONFIGURACIÓN
-│   └── config.py                    # Carga de variables de entorno con dotenv
-├── prompts/                         # 📝 PROMPTS (Espacio del Participante)
-│   ├── example.py                   # System prompt de ventas B2B
-│   └── README.md                    # Guía para redactar prompts
-├── example/                         # 💡 NUEVO: EJEMPLO DE AGENTE Y ORQUESTACIÓN
-│   └── agent_demo.py                # Script demo interactivo paso a paso (Memoria Dual)
-├── tools/                           # 🛠️ HERRAMIENTAS (Espacio del Participante)
-│   ├── __init__.py                  # Registro maestro de herramientas (ALL_TOOLS)
-│   ├── cloud/aws/aws_tools.py       # Herramientas de AWS S3 y OCR (Textract)
-│   └── whatsapp/whatsapp_tools.py   # Herramientas de WhatsApp (Twilio)
-├── main.py                          # 🚀 PUNTO DE ENTRADA (Orquestación del Flujo)
-├── pyproject.toml                   # Dependencias de Python gestionadas con UV
-└── checkpoints.db                   # Base de datos SQLite creada en la primera ejecución
+├── agents/             # Define aquí tus agentes personalizados
+├── config/             # Configuración centralizada y variables de entorno
+├── core/               # Motor de orquestación (No modificar)
+├── lib/                # Librerías base y lógica compartida
+├── memory/             # Gestión de memoria semántica (Mem0)
+├── prompts/            # Almacén de system prompts
+├── tools/              # Definición de herramientas (Tools) para los agentes
+└── main.py             # Punto de entrada de la aplicación
 ```
 
 ---
 
-## 🛠️ Configuración Inicial
+## Configuración Inicial
 
-1. **Instalar dependencias:**
-   Este starter-kit utiliza [uv](https://github.com/astral-sh/uv) para la gestión de dependencias de Python:
+1. Instalar dependencias:
+   Este proyecto utiliza uv para la gestión de paquetes, instala toda las dependencias utilizando el comando:
    ```bash
    uv sync
    ```
 
-2. **Configurar el archivo `.env`:**
-   Copia el archivo `.env.example` (o crea uno nuevo) y añade tus credenciales:
-   ```env
-   # Proveedor de LLM (openai | gemini | anthropic)
-   LLM_PROVIDER=openai
-   LLM_MODEL=gpt-4o
-
-   # Keys del Proveedor elegido
-   OPENAI_API_KEY=sk-...
-   GEMINI_API_KEY=AIzaSy...
-   ANTHROPIC_API_KEY=sk-ant-...
-
-   # Mem0 (Opcional - Si no se configura, el agente continuará sin memoria de largo plazo)
-   MEM0_API_KEY=m0-...
-
-   # Integraciones de AWS (S3 / Textract)
-   AWS_ACCESS_KEY_ID=...
-   AWS_SECRET_ACCESS_KEY=...
-   AWS_REGION=us-east-1
-   AWS_S3_BUCKET=mi-bucket-s3
-
-   # Integración de WhatsApp (Twilio)
-   TWILIO_ACCOUNT_SID=...
-   TWILIO_AUTH_TOKEN=...
-   TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+2. Configurar variables de entorno:
+   Copia el archivo de ejemplo y rellena tus credenciales:
+   ```bash
+   cp .env.example .env
    ```
+   Asegúrate de configurar al menos una API Key de LLM (OPENAI_API_KEY, GEMINI_API_KEY o ANTHROPIC_API_KEY).
 
 ---
 
-## 🚀 Cómo Ejecutar el Agente
+## Guía de Desarrollo
 
-### Modo Interactivo (Inicio de Conversación)
-Ejecuta el script directamente. Generará un `Thread ID` aleatorio y te pedirá instrucciones:
-```bash
-uv run python main.py
+### 1. El Motor Core (core/)
+El archivo core/engine.py contiene la función create_deep_agent. Esta función se encarga de:
+- Instanciar el LLM seleccionado.
+- Configurar el checkpointer de SQLite para la persistencia.
+- Compilar el grafo del agente con las herramientas proporcionadas.
+
+Nota: Se recomienda no modificar los archivos dentro de core/ para asegurar la estabilidad del motor.
+
+### 2. Creando un Agente
+Para crear un nuevo agente, debes definir su System Prompt y las Tools que podrá utilizar.
+
+```python
+from core.engine import create_deep_agent, run_agent
+from tools.whatsapp.whatsapp_tools import send_message_tool
+
+# 1. Definir el comportamiento
+SYSTEM_PROMPT = "Eres un asistente experto en logística..."
+
+# 2. Crear el agente
+agent, conn = await create_deep_agent(
+    system_prompt=SYSTEM_PROMPT,
+    tools=[send_message_tool],
+    provider="openai"
+)
+
+# 3. Ejecutar una tarea
+response = await run_agent(agent, "Hola, ¿puedes enviar un mensaje?", thread_id="user_123")
 ```
 
-### Reanudar una Tarea / Conversación
-Si la tarea se interrumpe, o si quieres continuar interactuando con el mismo agente en el mismo contexto de conversación, pasa el `Thread ID` que te arrojó la ejecución anterior:
-```bash
-uv run python main.py --thread-id <el-id-del-hilo>
-```
+### 3. Añadiendo Herramientas (Tools)
+Puedes extender las capacidades de tu agente añadiendo funciones en el directorio tools/. Cualquier función decorada con @tool de LangChain puede ser inyectada en el motor.
 
-### Pasar una Tarea Directamente por CLI
-Útil para testing rápido o pipelines de automatización:
-```bash
-uv run python main.py --task "Procesa la factura local 'invoice.jpg' y súbela a S3"
-```
+---
 
-### Ejecutar la Demostración de Memoria Dual
-Para probar un flujo completo simulado paso a paso, mostrando el funcionamiento del checkpointing local y la integración externa de Mem0 en acción:
+## Integraciones Disponibles
+
+### WhatsApp (Twilio)
+Permite a los agentes enviar y recibir mensajes de WhatsApp. Configura tus credenciales de Twilio en el .env para habilitarlo.
+
+### AWS Cloud
+Incluye herramientas para interactuar con servicios de AWS como S3, permitiendo al agente persistir o leer documentos en la nube.
+
+### Mem0 (Memoria Semántica)
+A diferencia de la memoria de sesión (que se olvida al cerrar el chat), Mem0 permite que el agente "recuerde" detalles del usuario a través de diferentes sesiones. 
+
+Nota: Esto puede tener fallos. Si decides utilizar la memoria de Mem0, asegúrate de que esto funcione correctamente. Revisa los docs: https://docs.mem0.ai/introduction
+
+---
+
+## BuildDay: El Reto
+Utiliza este kit para construir un agente que resuelva un problema real. Enfócate en:
+1. Diseñar un system_prompt efectivo en prompts/.
+2. Implementar herramientas útiles en tools/.
+3. Orquestar la lógica en un nuevo archivo dentro de agents/.
+
+¡Mucha suerte y happy coding!
+
+---
+
+## Ejemplo: Agente Validador de Documentos
+
+El archivo `example/agent_demo.py` muestra un flujo autónomo de cumplimiento.
+
+### Flujo del Agente:
+1. Recibe la ruta local del documento enviado por el proveedor.
+2. Sube el documento a AWS S3 para persistencia y trazabilidad.
+3. Extrae el texto del documento mediante OCR (AWS Textract).
+4. Valida que el tipo de documento sea el correcto y que los datos coincidan con lo esperado.
+5. Toma una decisión automática:
+    - Si es APROBADO: Emite un reporte de validación positiva.
+    - Si es RECHAZADO: Envía una notificación por WhatsApp al proveedor explicando el motivo y solicitando la corrección.
+
+### Ejecución del Demo:
 ```bash
 uv run python example/agent_demo.py
 ```
 
----
-
-## 🔧 Guía para Participantes: Agregando Funcionalidades
-
-### 1. Cómo Agregar una Nueva Herramienta (Tool)
-1. Crea tu función en cualquier parte de `tools/` (o dentro de un nuevo archivo).
-2. Agrega el decorador `@tool` de LangChain.
-3. Regístrala en [tools/\_\_init\_\_.py](file:///Users/carlosurias/Desktop/BuildDay/code/agents-starterkit/tools/__init__.py).
-
-**Ejemplo de Tool:**
-```python
-from langchain_core.tools import tool
-
-@tool
-def check_stock(product_id: str) -> str:
-    """Consulta el stock en tiempo real de un producto B2B usando su ID."""
-    # Lógica de conexión a tu base de datos o API...
-    return f"El stock disponible para {product_id} es de 150 unidades."
-```
-
-Luego regístrala en `ALL_TOOLS`:
-```python
-# tools/__init__.py
-from tools.stock import check_stock
-
-ALL_TOOLS = [
-    # ... otras tools ...
-    check_stock,
-]
-```
-
-### 2. Cómo Modificar el Prompt de Sistema
-Ve al archivo [prompts/example.py](file:///Users/carlosurias/Desktop/BuildDay/code/agents-starterkit/prompts/example.py) y modifica el string `SALES_AGENT_PROMPT`. 
-El motor de orquestación cargará automáticamente tus instrucciones actualizadas cada vez que ejecutes el agente.
-
----
-
-## 🏁 Tips para el Hackathon
-- **¿Qué da más puntos?** El uso efectivo de herramientas avanzadas de la nube (como el OCR de Textract para leer cotizaciones de clientes y el almacenamiento estructurado en S3), y la personalización de mensajes por WhatsApp.
-- **Uso de Mem0:** Si activas Mem0, el agente recordará interacciones previas del lead (por ejemplo, si el cliente mencionó en una tarea anterior que su presupuesto era de $50,000 MXN, el agente lo recordará en las siguientes interacciones).
-- **Manejo de Errores:** Las herramientas están estructuradas para capturar excepciones y retornar el error como string. Esto permite que el LLM del agente intente corregir la llamada autónomamente si se equivoca de parámetros.
+Este ejemplo demuestra cómo el agente puede tomar decisiones complejas utilizando herramientas externas y cerrar procesos de negocio de forma autónoma.
