@@ -1,7 +1,5 @@
 """
-Herramientas (Tools) del Agente.
-
-Aquí es donde los participantes del Hackathon registran sus herramientas.
+Herramientas (Tools) del Agente AgroCapital.
 
 ╔══════════════════════════════════════════════════════════════════╗
 ║  🔧 PARTICIPANTES:                                               ║
@@ -12,15 +10,14 @@ Aquí es donde los participantes del Hackathon registran sus herramientas.
 ╚══════════════════════════════════════════════════════════════════╝
 """
 
-from tools.scoring import score_lead
-from tools.fira import verificar_requisitos_fira
-
 from tools.cloud.aws.aws_tools import (
     upload_file_to_s3,
     download_file_from_s3,
     extract_text_with_ocr,
 )
 from tools.whatsapp.whatsapp_tools import send_whatsapp_message
+from tools.scoring import score_lead
+from tools.fira import verificar_requisitos_fira, consultar_productos_agrocapital
 
 # =================================================================
 # 📋 LISTA MAESTRA DE HERRAMIENTAS
@@ -31,6 +28,9 @@ ALL_TOOLS = [
     download_file_from_s3,
     extract_text_with_ocr,
     send_whatsapp_message,
+    score_lead,
+    verificar_requisitos_fira,
+    consultar_productos_agrocapital,
 ]
 
 __all__ = [
@@ -39,4 +39,7 @@ __all__ = [
     "download_file_from_s3",
     "extract_text_with_ocr",
     "send_whatsapp_message",
+    "score_lead",
+    "verificar_requisitos_fira",
+    "consultar_productos_agrocapital",
 ]
