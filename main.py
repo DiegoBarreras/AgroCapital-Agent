@@ -60,7 +60,7 @@ async def iniciar_agente(db_path: str = "./agrocapital_checkpoints.db"):
         while True:
             # Leer entrada del productor
             try:
-                entrada = input("Productor: ").strip()
+                entrada = input("Asesor AgroCapital: ").strip()
             except (EOFError, KeyboardInterrupt):
                 print("\n\nSesión finalizada.")
                 break

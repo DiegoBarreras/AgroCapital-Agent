@@ -17,4 +17,9 @@ dependencies = [
     "mem0ai>=0.1.18",
     "scikit-learn>=1.8.0",
     "hubspot-api-client>=12.0.0",
+    "fastapi>=0.136.1",
+    "uvicorn>=0.47.0",
+    "python-multipart>=0.0.29",
+    "streamlit>=1.57.0",
+    "nest-asyncio>=1.6.0",
 ]
