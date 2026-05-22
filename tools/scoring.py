@@ -1,38 +1,40 @@
 from langchain_core.tools import tool
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder
 import numpy as np
 
-# Encoding para tipo de crédito y cultivo
+# Costo máximo por hectárea según cultivo (crédito avío, Sinaloa)
+COSTO_MAX_POR_HECTAREA = {
+    "maiz": 12500,
+    "papa": 40000,
+    "sorgo": 7000,
+    "garbanzo": 8000,
+    "frijol": 6000,
+    "otro": 10000,
+}
+
 _cultivos = ["maiz", "papa", "sorgo", "garbanzo", "frijol", "otro"]
 _tipos_credito = ["avio", "refaccionario", "capital_trabajo", "prendario", "microcredito"]
 
 _cultivo_enc = {c: i for i, c in enumerate(_cultivos)}
 _tipo_enc = {t: i for i, t in enumerate(_tipos_credito)}
 
-# Datos de entrenamiento simulados basados en perfil real de AgroCapital
-# Features: [monto, hectareas, deudas_activas, score_buro, anios_exp, tipo_credito_enc, cultivo_enc]
-# Labels: 0=BAJO, 1=MEDIO, 2=ALTO
 _X_train = np.array([
-    # ALTO potencial
-    [50_000,   10,  0, 85, 5,  0, 0],  # avío, maíz, sin deudas
-    [100_000,  20,  1, 75, 8,  0, 0],  # avío, maíz, experiencia
-    [200_000,  50,  0, 90, 15, 1, 1],  # refaccionario, papa, muy exp
-    [500_000, 100,  1, 80, 20, 1, 2],  # refaccionario, sorgo, grande
-    [150_000,  30,  0, 88, 12, 0, 0],  # avío, maíz, limpio
-    [80_000,   15,  1, 70, 6,  2, 0],  # capital trabajo, maíz
-    # MEDIO potencial
-    [60_000,   12,  2, 55, 4,  0, 0],  # avío, maíz, deudas
-    [120_000,  25,  2, 65, 7,  1, 1],  # refaccionario, papa
-    [40_000,    8,  2, 60, 3,  0, 3],  # avío, garbanzo, poco exp
-    [90_000,   18,  3, 58, 5,  2, 2],  # capital trabajo, sorgo
-    [500_000,  80,  2, 60, 20, 1, 0],  # refaccionario grande con deudas
-    # BAJO potencial
-    [30_000,    5,  4, 35, 1,  0, 5],  # avío, sin exp, mal buró
-    [15_000,    2,  5, 20, 0,  4, 5],  # microcrédito, sin historial
-    [25_000,    4,  5, 25, 1,  0, 5],  # avío, muy endeudado
-    [10_000,    1,  6, 15, 0,  4, 5],  # microcrédito, perfil muy débil
-    [200_000,  10,  4, 30, 2,  1, 5],  # refaccionario, mal perfil
+    [50_000,   10,  0, 85, 5,  0, 0],
+    [100_000,  20,  1, 75, 8,  0, 0],
+    [200_000,  50,  0, 90, 15, 1, 1],
+    [500_000, 100,  1, 80, 20, 1, 2],
+    [150_000,  30,  0, 88, 12, 0, 0],
+    [80_000,   15,  1, 70, 6,  2, 0],
+    [60_000,   12,  2, 55, 4,  0, 0],
+    [120_000,  25,  2, 65, 7,  1, 1],
+    [40_000,    8,  2, 60, 3,  0, 3],
+    [90_000,   18,  3, 58, 5,  2, 2],
+    [500_000,  80,  2, 60, 20, 1, 0],
+    [30_000,    5,  4, 35, 1,  0, 5],
+    [15_000,    2,  5, 20, 0,  4, 5],
+    [25_000,    4,  5, 25, 1,  0, 5],
+    [10_000,    1,  6, 15, 0,  4, 5],
+    [200_000,  10,  4, 30, 2,  1, 5],
 ])
 
 _y_train = np.array([2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
@@ -61,21 +63,21 @@ def score_lead(
 ) -> dict:
     """
     Evalúa la viabilidad crediticia de un productor agrícola para AgroCapital
-    usando un modelo de Machine Learning (Random Forest). Clasifica el perfil
-    como ALTO, MEDIO o BAJO potencial considerando su historial, capacidad
-    productiva y el tipo de crédito que solicita.
+    usando Machine Learning (Random Forest). Clasifica el perfil como ALTO, MEDIO
+    o BAJO considerando historial, capacidad productiva, tipo de crédito y cultivo.
+    También valida que el monto solicitado sea razonable según las hectáreas y cultivo.
     Args:
-        monto_solicitado (float): Monto del crédito en pesos mexicanos.
-        hectareas (float): Superficie agrícola que trabaja el productor.
-        deudas_activas (int): Número de deudas activas actuales.
-        score_buro (float): Puntaje de buró de crédito (0-100).
-        anios_experiencia (int): Años de experiencia como productor agrícola.
-        tipo_credito (str): Tipo de crédito: avio, refaccionario, capital_trabajo, prendario, microcredito.
-        cultivo_principal (str): Cultivo principal: maiz, papa, sorgo, garbanzo, frijol, otro.
+        monto_solicitado: Monto del crédito en pesos mexicanos.
+        hectareas: Superficie agrícola que trabaja el productor.
+        deudas_activas: Número de deudas activas actuales.
+        score_buro: Puntaje de buró de crédito (0-100).
+        anios_experiencia: Años de experiencia como productor agrícola.
+        tipo_credito: Tipo de crédito: avio, refaccionario, capital_trabajo, prendario, microcredito.
+        cultivo_principal: Cultivo principal: maiz, papa, sorgo, garbanzo, frijol, otro.
     Returns:
-        dict: Score (ALTO/MEDIO/BAJO), confianza del modelo, clasificación PD y feedback.
+        dict: Score (ALTO/MEDIO/BAJO), confianza, clasificación PD, validación por hectárea y feedback.
     """
-    tipo_enc = _tipo_enc.get(tipo_credito.lower(), 5)
+    tipo_enc = _tipo_enc.get(tipo_credito.lower(), 4)
     cultivo_enc = _cultivo_enc.get(cultivo_principal.lower(), 5)
 
     features = np.array([[
@@ -87,8 +89,25 @@ def score_lead(
     probabilities = _model.predict_proba(features)[0]
     label = _labels[prediction]
 
+    # Validación de monto por hectárea según cultivo
+    costo_max = COSTO_MAX_POR_HECTAREA.get(cultivo_principal.lower(), 10000)
+    monto_maximo_recomendado = hectareas * costo_max
+    monto_excedido = monto_solicitado > monto_maximo_recomendado
+
+    alerta_monto = None
+    if monto_excedido:
+        alerta_monto = (
+            f"El monto solicitado (${monto_solicitado:,.0f}) supera el techo recomendado "
+            f"para {hectareas} ha de {cultivo_principal} "
+            f"(${monto_maximo_recomendado:,.0f} máx). "
+            f"Se recomienda justificar el excedente con plan de inversión detallado."
+        )
+        # Bajar score si el monto excede por más del 30%
+        if monto_solicitado > monto_maximo_recomendado * 1.3 and prediction > 0:
+            prediction = max(0, prediction - 1)
+            label = _labels[prediction]
+
     # Clasificación PD según metodología AgroCapital/FIRA
-    # Basada en salario mínimo de la región (~$260 MXN/día = ~$94,900 MXN/año)
     salario_minimo_anual = 94_900
     if monto_solicitado <= salario_minimo_anual * 1_000:
         clasificacion_pd = "PD1 (ingresos hasta 1,000 salarios mínimos)"
@@ -97,11 +116,13 @@ def score_lead(
     else:
         clasificacion_pd = "PD3 (ingresos superiores a 3,000 salarios mínimos)"
 
-    return {
+    resultado = {
         "score": label,
         "confianza": f"{max(probabilities) * 100:.1f}%",
         "clasificacion_pd_fira": clasificacion_pd,
         "recomendar_credito": prediction >= 1,
+        "monto_maximo_recomendado": f"${monto_maximo_recomendado:,.0f} MXN",
+        "monto_excedido": monto_excedido,
         "feedback": _feedback[prediction],
         "factores_evaluados": {
             "monto": monto_solicitado,
@@ -113,3 +134,8 @@ def score_lead(
             "cultivo": cultivo_principal,
         }
     }
+
+    if alerta_monto:
+        resultado["alerta_monto"] = alerta_monto
+
+    return resultado

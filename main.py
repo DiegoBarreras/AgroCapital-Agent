@@ -23,6 +23,9 @@ from core.engine import create_deep_agent, run_agent
 from prompts.agrocapital import AGROCAPITAL_AGENT_PROMPT
 from tools import ALL_TOOLS
 
+sys.stdin.reconfigure(encoding='utf-8', errors='replace')
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
 
 async def iniciar_agente(db_path: str = "./agrocapital_checkpoints.db"):
     """

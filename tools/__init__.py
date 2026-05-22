@@ -10,6 +10,10 @@ Herramientas (Tools) del Agente AgroCapital.
 ╚══════════════════════════════════════════════════════════════════╝
 """
 
+from tools.clientes_tool import consultar_cliente, listar_clientes_por_estatus
+
+from tools.hubspot_tool import registrar_prospecto_hubspot
+
 from tools.cloud.aws.aws_tools import (
     upload_file_to_s3,
     download_file_from_s3,
@@ -31,6 +35,9 @@ ALL_TOOLS = [
     score_lead,
     verificar_requisitos_fira,
     consultar_productos_agrocapital,
+    consultar_cliente, 
+    listar_clientes_por_estatus,
+    registrar_prospecto_hubspot
 ]
 
 __all__ = [
@@ -42,4 +49,6 @@ __all__ = [
     "score_lead",
     "verificar_requisitos_fira",
     "consultar_productos_agrocapital",
+    "consultar_cliente", 
+    "listar_clientes_por_estatus"
 ]

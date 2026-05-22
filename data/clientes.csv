@@ -1,0 +1,11 @@
+id,nombre,telefono,municipio,estado,cultivo_principal,hectareas,score_buro,deudas_activas,anios_experiencia,tipo_credito,monto_solicitado,estatus
+AC001,Juan Carlos Lizarraga Mora,+5216671234567,Culiacan,Sinaloa,maiz,25,82,1,10,avio,95000,activo
+AC002,Maria Elena Valenzuela Torres,+5216672345678,Los Mochis,Sinaloa,papa,15,65,2,6,avio,60000,activo
+AC003,Roberto Zazueta Ibarra,+5216673456789,Guasave,Sinaloa,sorgo,40,88,0,18,refaccionario,320000,activo
+AC004,Ernesto Palafox Guerrero,+5216674567890,Navolato,Sinaloa,maiz,8,35,5,2,avio,30000,rechazado
+AC005,Lucia Bojorquez Soto,+5216675678901,Culiacan,Sinaloa,garbanzo,20,74,1,9,capital_trabajo,75000,activo
+AC006,Pedro Inzunza Camacho,+5216676789012,El Fuerte,Sinaloa,maiz,60,91,0,22,refaccionario,480000,activo
+AC007,Gabriela Felix Angulo,+5216677890123,Ahome,Sinaloa,papa,12,58,3,4,avio,45000,revision
+AC008,Arturo Quintero Leal,+5216678901234,Guamuchil,Sinaloa,sorgo,35,77,1,14,avio,130000,activo
+AC009,Socorro Macias Corrales,+5216679012345,Mazatlan,Sinaloa,frijol,10,42,4,3,microcredito,25000,rechazado
+AC010,Fernando Aispuro Nevarez,+5216670123456,Durango,Durango,maiz,50,85,0,16,refaccionario,400000,activo
