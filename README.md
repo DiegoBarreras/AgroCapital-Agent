@@ -164,7 +164,7 @@ AgroAssistant:
 
 Desarrollado en el **Build Day: Agentes Inteligentes** organizado por la Facultad de Ingeniería Mochis, Universidad Autónoma de Sinaloa.
 
-Agradecemos a **AgroCapital del Noroeste / Grupo Ceres** por el planteamiento del reto y a **Zed Industries** por patrocinar el evento.
+Agradecemos a **AgroCapital del Noroeste / Grupo Ceres** por proporcionar el reto y a **Zed Industries** por patrocinar el evento.
 
 ---
 
